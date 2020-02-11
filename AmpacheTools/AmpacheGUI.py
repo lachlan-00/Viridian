@@ -28,14 +28,14 @@
 
 import sys
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import time
-import thread
+import _thread
 import gobject
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 import shutil
-import cPickle
+import pickle
 import getpass
 import traceback
 
@@ -58,7 +58,7 @@ try:
     import pygtk
     pygtk.require("2.0")
 except:
-    print "pygtk required!"
+    print("pygtk required!")
     sys.exit(1);
 
 
@@ -72,19 +72,19 @@ except:
 
 
 # personal helper functions
-import dbfunctions
-import helperfunctions
-import guifunctions
+from . import dbfunctions
+from . import helperfunctions
+from . import guifunctions
 
-from XMLRPCServerSession import XMLServer
+from .XMLRPCServerSession import XMLServer
 
 ### Contstants ###
 ALBUM_ART_SIZE = 90
 SCRIPT_PATH    = os.path.abspath(os.path.dirname(__file__))
 PLUGINS_DIR    = os.path.join(SCRIPT_PATH, 'plugins/')
 IMAGES_DIR     = os.path.join(SCRIPT_PATH, 'images/')
-THREAD_LOCK    = thread.allocate_lock() # used for downloads
-THREAD_LOCK_B  = thread.allocate_lock() # used for song changing
+THREAD_LOCK    = _thread.allocate_lock() # used for downloads
+THREAD_LOCK_B  = _thread.allocate_lock() # used for song changing
 VIRIDIAN_DIR   = os.path.join(os.environ['HOME'], '.viridian')
 ALBUM_ART_DIR  = os.path.join(VIRIDIAN_DIR, 'album_art')
 XML_RPC_PORT   = 4596
@@ -160,7 +160,7 @@ class AmpacheGUI:
             plugin = self.__import_plugin(plugin_name)
             if plugin:
                 self.plugins[plugin_name] = plugin
-        print "Plugins = ", self.plugins # DEBUG
+        print("Plugins = ", self.plugins) # DEBUG
 
         self.enabled_plugins = self.db_session.variable_get('enabled_plugins', [])
 
@@ -1596,7 +1596,7 @@ class AmpacheGUI:
             ampache_playlists = self.ampache_conn.get_playlists()
             if ampache_playlists == None:
                 ampache_playlists = []
-            print ampache_playlists
+            print(ampache_playlists)
             playlist_list_store.append(['<b> - Ampache Playlists - </b>', len(ampache_playlists), '----', '----', -1])
             if len(ampache_playlists) == 0:
                 playlist_list_store.append(['<i>-(None)-</i>', 0, '', '', -1])
@@ -1674,7 +1674,7 @@ class AmpacheGUI:
             if imported_plugin != None:
                 self.plugins[plugin] = imported_plugin
 
-        for name, plugin in self.plugins.iteritems():
+        for name, plugin in self.plugins.items():
             enabled = False
             if name in self.enabled_plugins:
                 enabled = True
@@ -1684,7 +1684,7 @@ class AmpacheGUI:
                 author      = plugin.author
                 list_store.append((enabled, title, description, name))
             except:
-                print _("Error: plugin '%s' could not be loaded because it is missing a title, description, and author instance variable") % (name)
+                print(_("Error: plugin '%s' could not be loaded because it is missing a title, description, and author instance variable") % (name))
 
 
         scrolled_window.add(treeview)
@@ -1912,23 +1912,23 @@ class AmpacheGUI:
         ampache  = self.ampache_conn.url
         username = self.ampache_conn.username
         password = self.ampache_conn.password
-        print "--- Attempting to login to Ampache ---"
-        print "Ampache  = %s" % ampache
-        print "Username = %s" % username
-        print "Password = " + len(password) * '*'
+        print("--- Attempting to login to Ampache ---")
+        print("Ampache  = %s" % ampache)
+        print("Username = %s" % username)
+        print("Password = " + len(password) * '*')
         # set the credentials and try to login
         self.__successfully_authed = None
         ################ Thread to authenticate (so the GUI doesn't lock) ############
-        thread.start_new_thread(self.__authenticate, (None,))
+        _thread.start_new_thread(self.__authenticate, (None,))
         while self.__successfully_authed == None:
             self.refresh_gui()
         self.go_to_ampache_menu_item.set_sensitive(True)
         ##############################################################################
         if self.__successfully_authed: # auth successful
             self.update_statusbar("Authentication Successful.")
-            print "Authentication Successful!"
-            print "Authentication = %s" % self.ampache_conn.auth_data['auth']
-            print "Number of artists = %d" % self.ampache_conn.auth_data['artists']
+            print("Authentication Successful!")
+            print("Authentication = %s" % self.ampache_conn.auth_data['auth'])
+            print("Number of artists = %d" % self.ampache_conn.auth_data['artists'])
 
             db_time      = int(self.db_session.variable_get('catalog_update', -1))
             ampache_time = int(self.ampache_conn.get_last_update_time())
@@ -1979,7 +1979,7 @@ class AmpacheGUI:
             if not error:
                 error = _("Unknown error, possibly an incorrect URL specified, or the server is not responding.")
             self.update_statusbar(_("Authentication Failed."))
-            print error
+            print(error)
             self.create_dialog_alert("error", _("Error Authenticating\n\n") + error, True)
 
             return False
@@ -2088,7 +2088,7 @@ class AmpacheGUI:
             for song in self.song_list_store:
                 list.append(song[6])
 
-            print "Sending this list of songs to player", list
+            print("Sending this list of songs to player", list)
             self.audio_engine.play_from_list_of_songs(list)
         else: # add mode
             for song in self.song_list_store:
@@ -2108,7 +2108,7 @@ class AmpacheGUI:
                 list.append(song[6])
 
             song_num = row[0]
-            print "Sending this list of songs to player", list
+            print("Sending this list of songs to player", list)
             self.audio_engine.play_from_list_of_songs(list, song_num)
         else: # add mode
             self.audio_engine.insert_into_playlist(song_id)
@@ -2286,9 +2286,9 @@ class AmpacheGUI:
         human_readable = helperfunctions.convert_seconds_to_human_readable(seek_time_secs)
         gobject.idle_add(self.time_seek_label.set_text, human_readable)
         if self.audio_engine.seek(seek_time_secs):
-            print "Seek to %s successful" % human_readable
+            print("Seek to %s successful" % human_readable)
         else:
-            print "Seek to %s failed!" % human_readable
+            print("Seek to %s failed!" % human_readable)
         return True
 
     def on_time_elapsed_slider_change_value(self, slider, data1=None, data2=None):
@@ -2329,12 +2329,12 @@ class AmpacheGUI:
             self.db_session.variable_set('credentials_password', password)
             self.db_session.variable_set('credentials_url', url)
             self.update_statusbar(_("Saved Credentials"))
-            print _("Credentials Saved")
+            print(_("Credentials Saved"))
             self.destroy_settings(window)
             self.login_and_get_artists("changed")
         else:
             self.update_statusbar(_("Couldn't save credentials!"))
-            print _("[Error] Couldn't save credentials!")
+            print(_("[Error] Couldn't save credentials!"))
             return False
         return True
 
@@ -2404,7 +2404,7 @@ class AmpacheGUI:
         """The save playlist button was clicked."""
         if not self.audio_engine.get_playlist():
             self.create_dialog_alert("error", _("Cannot save empty playlist."), True)
-            print _("Cannot save empty playlist")
+            print(_("Cannot save empty playlist"))
             return False
         self.show_playlist_select('Save')
         return False
@@ -2440,7 +2440,7 @@ class AmpacheGUI:
             else:
                 playlist = self.ampache_conn.get_playlist_songs(playlist_id)
                 if not playlist:
-                    print "Error with playlist %d" % playlist_id
+                    print("Error with playlist %d" % playlist_id)
                     self.create_dialog_alert("error", _("Problem loading playlist.  Playlist ID = %d" % playlist_id), True)
                     return True
                 for song in playlist:
@@ -2450,7 +2450,7 @@ class AmpacheGUI:
         elif type == 'Save': # Save playlist
             if not self.audio_engine.get_playlist(): # playlist is empty
                 self.create_dialog_alert("error", _("Cannot save empty playlist."), True)
-                print _("Cannot save empty playlist.")
+                print(_("Cannot save empty playlist."))
                 return False
             if text == '': # no name for list was specified
                 self.create_dialog_alert("error", _("Invalid Name."), True)
@@ -2491,7 +2491,7 @@ class AmpacheGUI:
                         f.write(helperfunctions.convert_html_to_string(self.ampache_conn.get_song_url(song_id).rpartition('.')[0]))
                         f.write("\n")
                     f.close()
-                    print "Exported playlist to %s" % (filename)
+                    print("Exported playlist to %s" % (filename))
                     self.create_dialog_alert("info", _("Playlist %s written to %s." % (playlist_name, filename)), True)
 
                 chooser.destroy()
@@ -2520,12 +2520,12 @@ class AmpacheGUI:
         """Clear local cache."""
         try: # check to see if this function is running
             if self.button_clear_cache_locked == True:
-                print "Already Running"
+                print("Already Running")
                 return False
         except:
             pass
         self.button_clear_cache_locked = True
-        print "Clearing cached catalog -- will reauthenticate and pull artists"
+        print("Clearing cached catalog -- will reauthenticate and pull artists")
         self.stop_all_threads()
         dbfunctions.clear_cached_catalog(self.db_session)
         #self.audio_engine.stop()
@@ -2552,7 +2552,7 @@ class AmpacheGUI:
             return False
         try: # check to see if this function is running
             if self.button_pre_cache_locked == True:
-                print "Already Running"
+                print("Already Running")
                 self.create_dialog_alert("info", _("Pre-Cache already in progress."))
                 return False
         except:
@@ -2597,9 +2597,9 @@ class AmpacheGUI:
             time_taken = helperfunctions.convert_seconds_to_human_readable(time_taken)
 
             self.update_statusbar(_("Finished Pre Cache -- Time Taken: " + str(time_taken)))
-            print "Finished Pre Cache -- Time Taken: " + str(time_taken)
-        except Exception, detail:
-            print "Error with pre-cache!", detail
+            print("Finished Pre Cache -- Time Taken: " + str(time_taken))
+        except Exception as detail:
+            print("Error with pre-cache!", detail)
             self.update_statusbar(_("Error with pre-cache!"))
             self.button_pre_cache_locked = False
             self.create_dialog_alert("error", _("Error with pre-cache!\n\n"+str(detail) ) )
@@ -2749,7 +2749,7 @@ class AmpacheGUI:
                 self.current_song_info = dbfunctions.get_single_song_dict(self.db_session, song_id)
             else:
                 self.current_song_info = self.ampache_conn.get_song_info(song_id)
-        thread.start_new_thread(self.__audioengine_song_changed, (song_id,))
+        _thread.start_new_thread(self.__audioengine_song_changed, (song_id,))
 
     def __audioengine_song_changed(self, song_id):
         """The function that gets called when the AudioEngine changes songs."""
@@ -2766,7 +2766,7 @@ class AmpacheGUI:
             return False
         self.play_pause_image.set_from_pixbuf(self.images_pixbuf_pause)
 
-        print self.current_song_info # DEBUG
+        print(self.current_song_info) # DEBUG
 
         song_time   = self.current_song_info['song_time']
         self.time_elapsed_slider.set_range(0, song_time)
@@ -2803,15 +2803,15 @@ class AmpacheGUI:
             os.mkdir(ALBUM_ART_DIR)
         self.current_album_art_file = os.path.join(ALBUM_ART_DIR,  str(album_id))
         if os.path.isfile(self.current_album_art_file):
-            print "Album art exists locally"
+            print("Album art exists locally")
         else:
-            print "Fetching album art... ",
+            print("Fetching album art... ", end=' ')
             album_art = self.ampache_conn.get_album_art(album_id)
-            response = urllib2.urlopen(album_art)
+            response = urllib.request.urlopen(album_art)
             f = open(self.current_album_art_file, 'w')
             f.write(response.read())
             f.close()
-            print "Done!"
+            print("Done!")
         # now create a pixel buffer for the image and set it in the GUI
         image_pixbuf = guifunctions.create_image_pixbuf(self.current_album_art_file, ALBUM_ART_SIZE)
         self.album_art_image.set_from_pixbuf(image_pixbuf)
@@ -2838,16 +2838,16 @@ class AmpacheGUI:
 
     def _alert_plugins_of_song_change(self, *args):
         """Fire off enabled plugins because the song has changed"""
-        for name, plugin in self.plugins.iteritems():
+        for name, plugin in self.plugins.items():
             if name in self.enabled_plugins: # only fire off enabled plugins
                 try:
-                    print "Alerting plugin '%s' of song change" % (name)
+                    print("Alerting plugin '%s' of song change" % (name))
                     plugin.on_song_change(self.current_song_info)
-                    print "Plugin exited successfully"
+                    print("Plugin exited successfully")
                 except:
-                    print "Error with plugin '%s':\n+++++++ BEGIN STACK TRACE ++++++++" % (name)
+                    print("Error with plugin '%s':\n+++++++ BEGIN STACK TRACE ++++++++" % (name))
                     traceback.print_exc() # DEBUG
-                    print "++++++++ END STACK TRACE +++++++++"
+                    print("++++++++ END STACK TRACE +++++++++")
                     pass
 
     def audioengine_error_callback(self, error_message):
@@ -3018,7 +3018,7 @@ Message from GStreamer:
         self.audio_engine.set_playlist(list)
         self.update_statusbar(_('Loading Playlist...'))
         i = 1
-        print list
+        print(list)
         for song in list:
             self.update_statusbar(_('Querying for song %d/%d in playlist') % (i, len(list)))
             if not dbfunctions.song_has_info(self.db_session, song):
@@ -3170,12 +3170,12 @@ Message from GStreamer:
         full_file = os.path.join(self.downloads_directory, song_string)
         self.downloads_list_store.append([song_string, 0, full_file])
         iter1 = self.downloads_list_store.get_iter(len(self.downloads_list_store) - 1)
-        thread.start_new_thread(self.download_song, (song_url, full_file, iter1))
+        _thread.start_new_thread(self.download_song, (song_url, full_file, iter1))
 
     def download_song(self, url, dst, iter1):
         THREAD_LOCK.acquire()
-        print "get url '%s' to '%s'" % (url, dst)
-        urllib.urlretrieve(url, dst,
+        print("get url '%s' to '%s'" % (url, dst))
+        urllib.request.urlretrieve(url, dst,
                 lambda nb, bs, fs, url=url: self._reporthook(nb,bs,fs,url,iter1))
         self.notification(_("Download Complete"), os.path.basename(url).replace('%20',' ').replace('%27', "'"))
         THREAD_LOCK.release()
@@ -3199,10 +3199,10 @@ Message from GStreamer:
     def clear_album_art(self):
         """Clear local album art."""
         if os.path.exists(ALBUM_ART_DIR):
-            print "+++ Checking for album art +++"
+            print("+++ Checking for album art +++")
             for root, dirs, files in os.walk(ALBUM_ART_DIR):
                 for name in files:
-                    print "Deleting ", os.path.join(root, name)
+                    print("Deleting ", os.path.join(root, name))
                     os.remove(os.path.join(root, name))
 
     def reset_everything(self):
@@ -3260,12 +3260,12 @@ Message from GStreamer:
     def __re_fetch_album_art(self, data=None):
         try: # check to see if this function is running
             if self.button_album_art_locked == True:
-                print "Already Running"
+                print("Already Running")
                 return False
         except:
             pass
         self.button_album_art_locked = True
-        print "Re-Fetching album art... ",
+        print("Re-Fetching album art... ", end=' ')
         self.update_statusbar(_("Re-Fetching album art..."))
         if not os.path.exists(ALBUM_ART_DIR):
             os.mkdir(ALBUM_ART_DIR)
@@ -3273,19 +3273,19 @@ Message from GStreamer:
             album_id   = self.current_song_info['album_id']
             art_file   = os.path.join(ALBUM_ART_DIR, str(album_id))
             album_art  = self.ampache_conn.get_album_art(album_id)
-            response   = urllib2.urlopen(album_art)
+            response   = urllib.request.urlopen(album_art)
             f = open(art_file, 'w')
             f.write(response.read())
             f.close()
         except: # cache was cleared or something and it fails...
             self.update_statusbar(_("Re-Fetching album art... Failed!"))
-            print "Failed!"
+            print("Failed!")
             self.button_album_art_locked = False
             return False
         image_pixbuf = guifunctions.create_image_pixbuf(art_file, ALBUM_ART_SIZE)
         self.album_art_image.set_from_pixbuf(image_pixbuf)
         self.set_tray_icon(image_pixbuf)
-        print "Done!"
+        print("Done!")
         self.update_statusbar(_("Re-Fetching album art... Success!"))
         self.button_album_art_locked = False
         return True
@@ -3297,7 +3297,7 @@ Message from GStreamer:
         model = self.song_list_store
 
         if not songs:
-            print "Error pulling ", album_id
+            print("Error pulling ", album_id)
             self.update_statusbar(_("Error with album -- Check Ampache -- Album ID = %d" % album_id))
             return False
 

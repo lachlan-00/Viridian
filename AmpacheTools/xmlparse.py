@@ -103,4 +103,4 @@ if __name__ == '__main__':
 
     d = xmltodict(s)
 
-    print(json.dumps(d, indent=4))
+    print((json.dumps(d, indent=4)))

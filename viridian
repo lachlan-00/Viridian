@@ -54,7 +54,7 @@ if __name__ == '__main__':
     if not os.path.exists(VIRIDIAN_DIR):
         is_first_time = True
         os.mkdir(VIRIDIAN_DIR)
-        os.chmod(VIRIDIAN_DIR, 0700)
+        #os.chmod(VIRIDIAN_DIR, 0700)
 
     db_session   = AmpacheTools.DatabaseSession.DatabaseSession(os.path.join(VIRIDIAN_DIR, 'viridian.sqlite'))
     ampache_conn = AmpacheTools.AmpacheSession.AmpacheSession()

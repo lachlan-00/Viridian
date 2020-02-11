@@ -39,9 +39,9 @@ class PidginPlugin:
             obj = bus.get_object("im.pidgin.purple.PurpleService", "/im/pidgin/purple/PurpleObject")
             self.purple = dbus.Interface(obj, "im.pidgin.purple.PurpleInterface")
             self.set_message('Now Playing :: %s by %s' % (song_dict['song_title'], song_dict['artist_name']))
-            print "Status Set"
+            print("Status Set")
         except:
-            print "Error setting status"
+            print("Error setting status")
             pass
 
 

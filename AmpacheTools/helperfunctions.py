@@ -28,7 +28,7 @@
 
 import time
 import gtk
-import urllib
+import urllib.request, urllib.parse, urllib.error
 """
  Misc. functions for AmpacheGUI
 """
@@ -67,7 +67,7 @@ def convert_string_to_html(string):
 
 def convert_html_to_string(html):
     """Replace HTML characters to their normal character counterparts."""
-    return urllib.url2pathname(html.replace('&amp;', '&'))
+    return urllib.request.url2pathname(html.replace('&amp;', '&'))
 
 #################
 # Sort Functions

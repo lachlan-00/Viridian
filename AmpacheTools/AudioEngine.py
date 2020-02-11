@@ -67,7 +67,7 @@ class AudioEngine:
         """Takes a list of song_ids and position in the list and plays it.
         This function will use the AmpacheSession to turn song_ids into song_urls."""
         if not songs_list:
-            print "Can't play empty list"
+            print("Can't play empty list")
             return False
         self.songs_list = songs_list
         self.song_num = song_num
@@ -82,7 +82,7 @@ class AudioEngine:
             self.stop()
             if self.ampache_gui != None:
                 self.ampache_gui.audioengine_song_changed(None) # hook into GUI
-            print "No more songs"
+            print("No more songs")
 
 
     def on_message(self, bus, message):
@@ -91,13 +91,13 @@ class AudioEngine:
         t = message.type
         if t == gst.MESSAGE_EOS: # end of song
             self.stop()
-            print "Song is over -- trying next song"
+            print("Song is over -- trying next song")
             self.next_track(True)
         elif t == gst.MESSAGE_ERROR: # error!
             self.stop()
             err, debug = message.parse_error()
             result =  "Gstreamer Error: %s %s" % (err, debug)
-            print result
+            print(result)
             if self.ampache_gui != None:
                 self.ampache_gui.audioengine_error_callback(result)
     def on_about_to_finish(self, player):

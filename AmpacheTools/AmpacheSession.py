@@ -32,10 +32,10 @@ import re
 import sys
 import time
 import traceback
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
-from xmlparse import xmltodict
+from .xmlparse import xmltodict
 
 # The api version this class communicates with
 API_VERSION = 350001
@@ -43,12 +43,12 @@ API_VERSION = 350001
 # The max number of data to ask for in a single request
 MAX_OFFSET = 5000
 
-__ILLEGAL_XML = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-         u'|' + \
-         u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-         (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-          unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-          unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+__ILLEGAL_XML = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+         '|' + \
+         '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+         (chr(0xd800),chr(0xdbff),chr(0xdc00),chr(0xdfff),
+          chr(0xd800),chr(0xdbff),chr(0xdc00),chr(0xdfff),
+          chr(0xd800),chr(0xdbff),chr(0xdc00),chr(0xdfff))
 ILLEGAL_XML_RE = re.compile(__ILLEGAL_XML)
 
 class AmpacheSession:
@@ -104,17 +104,17 @@ class AmpacheSession:
         # now send the authentication request to Ampache
         try:
             res = self.__call_api(values)
-            for k,v in res.iteritems():
+            for k,v in res.items():
                 res[k] = v[0]['child']
             # Save the data returned from the initial authentication
             self.auth_data = res
-        except Exception, e: # couldn't auth, try up to AUTH_MAX_RETRY times
-            print e
-            print '[Error] Authentication Failed'
+        except Exception as e: # couldn't auth, try up to AUTH_MAX_RETRY times
+            print(e)
+            print('[Error] Authentication Failed')
             error = None
             try: # to find the error
                 error = dom.getElementsByTagName("error")[0].childNodes[0].data
-                print "[Error] Authentication Failed :: %s" % error
+                print("[Error] Authentication Failed :: %s" % error)
                 return error
             except: # no error found.. must have failed because data was sent to wrong place
                 return False
@@ -127,8 +127,8 @@ class AmpacheSession:
 
             new_time  = max([update, add, clean])
             self.last_update_time = new_time
-        except Exception, detail:
-            print "Couldn't get time catalog was updated -- assuming catalog is dirty -- ", detail
+        except Exception as detail:
+            print("Couldn't get time catalog was updated -- assuming catalog is dirty -- ", detail)
             self.last_update_time = -1
         return self.auth_data
 
@@ -342,7 +342,7 @@ class AmpacheSession:
                 }
                 l.append(song_dict)
         except:
-            print "This playlist failed", playlist_id
+            print("This playlist failed", playlist_id)
             traceback.print_exc()
             return None
         return l
@@ -364,12 +364,12 @@ class AmpacheSession:
             values['auth'] = self.auth_data['auth']
 
         # Encode the data for a GET request
-        data = urllib.urlencode(values)
+        data = urllib.parse.urlencode(values)
 
         #print values
 
         # Try to make the request
-        xml_string = urllib2.urlopen(self.xml_rpc + '?' + data).read()
+        xml_string = urllib.request.urlopen(self.xml_rpc + '?' + data).read()
 
         # Parse the XML
         response_data = xmltodict(self.__sanitize(xml_string))
@@ -405,7 +405,7 @@ class AmpacheSession:
             if self.auth_data[action] > MAX_OFFSET:
                 l = []
                 for i in range(0, self.auth_data[action], MAX_OFFSET):
-                    print 'Offset = %d' % (i)
+                    print('Offset = %d' % (i))
                     l += self.__get(action, offset=i, _filter=_filter)
                 return l
 
@@ -422,7 +422,7 @@ class AmpacheSession:
             d = {}
             if item['attr']:
                 d.update(item['attr'])
-            for k, v in item['child'].iteritems():
+            for k, v in item['child'].items():
                 d[k] = v[0]['child']
             ret.append(d)
 

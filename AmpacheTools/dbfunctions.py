@@ -30,7 +30,7 @@
  Extra functions to query the database, to be used by AmpacheTools.AmpacheGUI
 """
 
-import cPickle
+import pickle
 
 def clear_cached_catalog(db_session):
     """Clear the locally cached catalog."""
@@ -369,7 +369,7 @@ def set_playlist(db_session, name, songs):
     """Saves a playilst with the given name in the database, automatically pickles list."""
     c = db_session.cursor()
     c.execute("""DELETE FROM playlists WHERE name = ?""", [name])
-    c.execute("""INSERT INTO playlists (name, songs) VALUES (?, ?)""", [name, str(cPickle.dumps(songs))])
+    c.execute("""INSERT INTO playlists (name, songs) VALUES (?, ?)""", [name, str(pickle.dumps(songs))])
     db_session.commit()
     c.close()
 
@@ -390,7 +390,7 @@ def get_playlist(db_session, name, default_value=[]):
     except:
         c.close()
         return default_value
-    return cPickle.loads(str(result))
+    return pickle.loads(str(result))
 
 def get_playlists(db_session):
     """Retrieve all playlists stored locally as a list"""
@@ -400,7 +400,7 @@ def get_playlists(db_session):
     for row in c:
         l.append(
             {'name' : row[0],
-             'songs': cPickle.loads(str(row[1])),
+             'songs': pickle.loads(str(row[1])),
             }
         )
     c.close()

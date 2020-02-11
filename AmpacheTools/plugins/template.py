@@ -32,5 +32,5 @@ class TemplatePlugin:
     def on_song_change(self, song_dict):
         """Called when the song changes in Viridian.
         A dictionary with all of the songs information is passed in as 'song_dict'"""
-        for k,v in song_dict.iteritems():
-            print "song_dict['%s'] = '%s'" % (k,v)
+        for k,v in song_dict.items():
+            print("song_dict['%s'] = '%s'" % (k,v))

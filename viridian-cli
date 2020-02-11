@@ -48,16 +48,16 @@ def get_valid_digit(prompt = "Enter data: "):
         if _id.isdigit():
             valid = True
         else:
-            print "Error! Invalid Album ID"
+            print("Error! Invalid Album ID")
     return _id
 
 def print_now_playing():
     song_id   = audio_engine.get_current_song_id()
     song_dict = ampache_conn.get_song_info(song_id)
-    print " - Now Playing - "
-    print song_dict['song_title']
-    print "By: %s" % song_dict['artist_name']
-    print "On: %s" % song_dict['album_name']
+    print(" - Now Playing - ")
+    print(song_dict['song_title'])
+    print("By: %s" % song_dict['artist_name'])
+    print("On: %s" % song_dict['album_name'])
 
 def next_track():
     audio_engine.next_track()
@@ -100,24 +100,24 @@ if __name__ == "__main__":
             if ampache_conn.authenticate():
                 ready = True
         else:
-            print "Error! Try Again"
+            print("Error! Try Again")
 
     for artist in ampache_conn.get_artists():
-        print "%d: %s" % (artist['artist_id'], artist['artist_name'])
+        print("%d: %s" % (artist['artist_id'], artist['artist_name']))
 
     artist_id = get_valid_digit("Artist ID: ")
 
-    print '\n'
+    print('\n')
     for album in ampache_conn.get_albums_by_artist(artist_id):
-        print "%d: %s (Year = %s, Disk = %d, Tracks = %d)" % (album['album_id'], album['album_name'], album['album_year'], album['album_disk'], album['album_tracks'])
+        print("%d: %s (Year = %s, Disk = %d, Tracks = %d)" % (album['album_id'], album['album_name'], album['album_year'], album['album_disk'], album['album_tracks']))
 
     album_id = get_valid_digit("Album ID: ")
 
-    print '\n'
+    print('\n')
     song_list = ampache_conn.get_songs_by_album(album_id)
     song_list = sorted(song_list, key=lambda k: k['song_track'])
     for song in song_list:
-        print "%d: %s" % (song['song_track'], song['song_title'])
+        print("%d: %s" % (song['song_track'], song['song_title']))
     l = []
     for song in song_list:
         l.append(song['song_id'])
@@ -130,9 +130,9 @@ if __name__ == "__main__":
 
     quit = False
     while not quit:
-        print "Choices are 'n' for next, 'p' for previous, 'i' for info, 's' for play/pause, and 'q' for quit"
+        print("Choices are 'n' for next, 'p' for previous, 'i' for info, 's' for play/pause, and 'q' for quit")
         resp = raw_input("Choice: ")
-        print "\n\n"
+        print("\n\n")
         if resp == 'n':
             next_track()
         elif resp == 'p':
@@ -142,10 +142,9 @@ if __name__ == "__main__":
         elif resp == 's':
             if audio_engine.get_state() == 'playing':
                 audio_engine.pause()
-                print audio_engine.get_state()
             else:
                 audio_engine.play()
-                print audio_engine.get_state()
+            print(audio_engine.get_state())
         elif resp == 'q':
             quit = True
-        print "\n\n"
+        print("\n\n")

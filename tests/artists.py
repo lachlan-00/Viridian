@@ -17,8 +17,8 @@ from AmpacheTools import AmpacheSession
 # Load the conf
 try:
     conf = json.loads(open('config.json').read())
-except Exception, e:
-    print >>sys.stderr, 'Error parsing config\n', e
+except Exception as e:
+    print('Error parsing config\n', e, file=sys.stderr)
     sys.exit(1)
 
 # Create the AmpacheSession object
@@ -26,7 +26,7 @@ ampache_conn = AmpacheSession.AmpacheSession()
 ampache_conn.set_credentials(conf['username'], conf['password'], conf['url'])
 
 if not ampache_conn.authenticate():
-    print >>sys.stderr, 'Failed to authenticate!'
+    print('Failed to authenticate!', file=sys.stderr)
     sys.exit(2)
 
-print json.dumps(ampache_conn.get_artists(), indent=4)
+print(json.dumps(ampache_conn.get_artists(), indent=4))

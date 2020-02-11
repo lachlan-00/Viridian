@@ -27,12 +27,12 @@
 
 
 import os
-import cPickle
+import pickle
 
 try:
     import sqlite3
 except:
-    print "[Warn] sqlite3 not found -- loading sqlite2"
+    print("[Warn] sqlite3 not found -- loading sqlite2")
     from pysqlite2 import dbapi2 as sqlite3
 
 class DatabaseSession:
@@ -84,7 +84,7 @@ class DatabaseSession:
         #var_value = self.__convert_specials_to_strings(var_value)
         c = self.cursor()
         c.execute("""DELETE FROM variable WHERE name = ?""", [var_name])
-        c.execute("""INSERT INTO variable (name, value) VALUES (?, ?)""", [var_name, str(cPickle.dumps(var_value))])
+        c.execute("""INSERT INTO variable (name, value) VALUES (?, ?)""", [var_name, str(pickle.dumps(var_value))])
         self.commit()
         c.close()
 
@@ -100,4 +100,4 @@ class DatabaseSession:
         except:
             c.close()
             return default_value
-        return cPickle.loads(str(result))
+        return pickle.loads(str(result))

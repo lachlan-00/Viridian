@@ -27,12 +27,12 @@
 """
 XML RPC Server
 """
-import xmlrpclib
-import thread
+import xmlrpc.client
+import _thread
 import socket
 
-from SimpleXMLRPCServer import SimpleXMLRPCServer
-from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+from xmlrpc.server import SimpleXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
     # Restrict to a particular path.
@@ -53,7 +53,7 @@ class XMLServer:
         """Start the server."""
         if self.is_running == False:
             self.is_running = True
-            thread.start_new_thread(self.__serve_forever, (None,))
+            _thread.start_new_thread(self.__serve_forever, (None,))
 
     def __serve_forever(self, data=None):
         """Helper to start in a thread."""
